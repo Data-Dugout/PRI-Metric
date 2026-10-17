@@ -11,10 +11,13 @@
 <link rel="shortcut icon" href="assets/favicon.ico">
 <link rel="stylesheet" href="css/style.css">
 <style>
+  .pagehero.compact{padding:32px 0 16px;}
+  .pagehero.compact h1{font-size:clamp(1.5rem,5.2vw,2.3rem); margin:4px 0 10px;}
+  .pagehero.compact p{margin:0; font-size:.95rem;}
   .chartblock{margin:40px 0 0;}
   .chartblock h3{margin:0 0 4px;}
   .chartblock .axis{font-size:.8rem; opacity:.7; margin:10px 0 0; text-align:center; font-family:'IBM Plex Mono', monospace;}
-  .chartblock .barchart{margin-top:28px;}
+  .chartblock .barchart, .chartblock .divchart{margin-top:32px;}
   .divchart .dplot{display:flex; gap:14px; height:280px; position:relative;}
   .divchart .dcol{flex:1; position:relative; height:100%;}
   .divchart .dzero{position:absolute; left:0; right:0; height:1px; background:var(--ink-900); opacity:.5;}
@@ -52,18 +55,29 @@
 </header>
 
 <main>
-  <section class="pagehero">
+  <section class="pagehero compact">
     <div class="wrap" style="max-width:72ch;">
       <p class="eyebrow">Results</p>
       <h1>Testing the Accuracy of PRI</h1>
-      <p style="opacity:.75;">1,423 qualified player-seasons across five seasons, 2021&ndash;2026. All figures use the four-input PoR score (BA, SLG, wOBA, BABIP).</p>
+      <p style="opacity:.75;">Tested 1,423 qualified player-seasons across five seasons, 2021&ndash;2026. Read about the formula <a href="methodology.html">here</a>.</p>
     </div>
   </section>
 
   <section>
     <div class="wrap">
+      <div class="grid-2" style="margin-bottom:40px;">
+        <div class="card">
+          <div class="num">1,423</div>
+          <div class="cap">qualified player-seasons tested across five seasons, 2021–2026</div>
+        </div>
+        <div class="card">
+          <div class="num">94.3%</div>
+          <div class="cap">accuracy at the tightest confidence threshold (500+ PA, wRC+ 90/110 split)</div>
+        </div>
+      </div>
+
       <p style="max-width:calc(72ch - 48px); margin-left:auto; margin-right:auto;">The below charts show the compiled results from 2021&ndash;2026 of some key
-      testing points. First, the percentage of players who improved their wRC+ the next season, with their PRI
+      testing points. First, the percentage of players who improved their wRC+ the next season, with the PRI
       score ranges across the x-axis. This shows the trend and correlation between PRI and offensive production.</p>
 
       <p style="max-width:calc(72ch - 48px); margin-left:auto; margin-right:auto;">The second chart shows the average wRC+ change year-over-year, with the PRI
@@ -133,17 +147,6 @@
 
   <section>
     <div class="wrap">
-      <div class="grid-2">
-        <div class="card">
-          <div class="num">1,423</div>
-          <div class="cap">qualified player-seasons tested across five seasons, 2021–2026</div>
-        </div>
-        <div class="card">
-          <div class="num">94.3%</div>
-          <div class="cap">accuracy at the tightest confidence threshold (500+ PA, wRC+ 90/110 split)</div>
-        </div>
-      </div>
-
       <div style="max-width:calc(72ch - 48px); margin:48px auto 0;">
         <h2>Importance of wRC+ thresholds</h2>
         <p>The PRI metric was tested on over 1,400 qualified player-seasons across five seasons (2021&ndash;2026), with the
