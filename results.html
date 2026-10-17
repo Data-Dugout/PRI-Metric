@@ -244,31 +244,18 @@
         strengthens my prediction that he will improve in offensive production in 2026
         (which he did).</p>
       </div>
-
-      <div class="grid-2" style="margin-top:40px;">
-        <div class="card" style="padding:28px;">
-          <h3>Progression candidates</h3>
-          <p>Below-average hitters (wRC+ &lt; 100) who got unlucky — high PoR score,
-          low actual production. History says they're due for a jump.</p>
-          <a href="methodology.html">How the score is built &rarr;</a>
-        </div>
-        <div class="card" style="padding:28px;">
-          <h3>Regression candidates</h3>
-          <p>Above-average hitters (wRC+ &gt; 100) who got lucky — low PoR score,
-          strong actual production. History says the shine wears off.</p>
-          <a href="#accuracy">See the full breakdown &darr;</a>
-        </div>
-      </div>
     </div>
   </section>
 
   <section id="accuracy">
     <div class="wrap">
       <div style="max-width:calc(72ch - 48px); margin:0 auto;">
-      <h3 class="subhead">Accuracy by playing time</h3>
-      <p>Accuracy improves the more plate appearances a hitter
-      gets the following season — regression to the mean needs playing time to show
-      up in the box score.</p>
+      <h3 class="subhead">Importance of PA thresholds</h3>
+      <p>Accuracy improves the more plate appearances a hitter gets the following season.
+      More playing time means a bigger sample size, and a bigger sample pulls a hitter's
+      results closer to their expected metrics. It's simple math in action: the more
+      at-bats a player gets, the less luck can distort the outcome, and the more room
+      the prediction has to come true.</p>
       </div>
 
       <div class="table-wrap">
@@ -304,25 +291,6 @@
       </div>
 
       <p class="eyebrow" style="margin-top:8px;">High PoR = progression candidates &middot; Low PoR = regression candidates</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="grid-3">
-        <div class="card">
-          <div class="num">r = 0.47</div>
-          <div class="cap">correlation between PoR score and following-year wRC+ change, across all 1,423 player-seasons</div>
-        </div>
-        <div class="card">
-          <div class="num">+6&ndash;8 pts</div>
-          <div class="cap">accuracy gained on regression detection after adding BABIP as a fourth input</div>
-        </div>
-        <div class="card">
-          <div class="num">2021&ndash;26</div>
-          <div class="cap">five seasons tested; 2019&ndash;20 excluded due to the shortened COVID follow-up year</div>
-        </div>
-      </div>
     </div>
   </section>
 </main>
