@@ -27,6 +27,7 @@
   .rule.hi .k{color:var(--turf-700);}
   .rule.lo .k{color:var(--clay-500);}
   @media (max-width:760px){ .tests{grid-template-columns:1fr;} }
+  h3.subhead{font-size:1.5rem; margin:40px 0 12px;}
   .chartblock{margin:40px 0 0;}
   .chartblock h3{margin:0 0 4px;}
   .chartblock .axis{font-size:.8rem; opacity:.7; margin:10px 0 0; text-align:center; font-family:'IBM Plex Mono', monospace;}
@@ -180,12 +181,16 @@
         plate appearance threshold, the odds get increasingly higher. These are very
         useful to use in addition to PRI.</p>
 
-        <p>So, a practical use would go something like this: Jac Caglianone had a wRC+ of
-        just 46 in 2025 and a PRI score of 100. The addition of a low wRC+ greatly
-        strengthens my prediction that he will improve in offensive production in 2026
-        (which he did).</p>
+        <h3 class="subhead">Why 60 and 40?</h3>
+        <p>Phase 1 showed where the signal is strongest. Players with a PRI above 60
+        improved their wRC+ at least 59% of the time, and that jumped to 78% in the
+        70&ndash;80 range. At the other end, players at 40 and below improved only 25% of
+        the time or less. The middle is much weaker: players in the 50&ndash;60 range
+        improved just 53% of the time, close to a coin flip. So these tests count players
+        above 60 as progression candidates and players at 40 and below as regression
+        candidates.</p>
 
-        <h2 style="margin-top:40px;">Importance of wRC+ thresholds</h2>
+        <h3 class="subhead">Importance of wRC+ thresholds</h3>
         <p>I tested two threshold levels, using the prior-year wRC+ to filter PRI
         predictions. The first was the league average of 100. The second tightened it
         to 90 and 110. These tests filtered players with a PRI above 60 as progression
@@ -211,6 +216,12 @@
 
       <div style="max-width:calc(72ch - 48px); margin:0 auto;">
         <div class="callout" style="margin-top:20px;">The tighter split leaves a smaller sample, but the metric's success rate goes up.</div>
+
+        <h3 class="subhead">Putting it into practice</h3>
+        <p>So, a practical use would go something like this: Jac Caglianone had a wRC+ of
+        just 46 in 2025 and a PRI score of 100. The addition of a low wRC+ greatly
+        strengthens my prediction that he will improve in offensive production in 2026
+        (which he did).</p>
       </div>
 
       <div class="grid-2" style="margin-top:40px;">
@@ -233,7 +244,7 @@
   <section id="accuracy">
     <div class="wrap">
       <div style="max-width:calc(72ch - 48px); margin:0 auto;">
-      <h2>Accuracy by playing time</h2>
+      <h3 class="subhead">Accuracy by playing time</h3>
       <p>Accuracy improves the more plate appearances a hitter
       gets the following season — regression to the mean needs playing time to show
       up in the box score.</p>
