@@ -215,6 +215,27 @@
       </div>
 
       <div style="max-width:calc(72ch - 48px); margin:0 auto;">
+        <h3 class="subhead">Overall accuracy</h3>
+        <p>Here is how accuracy builds as each wRC+ filter is added. Accuracy is the share
+        of predictions that matched the player&rsquo;s actual change in wRC+ the following
+        season.</p>
+      </div>
+
+      <div class="table-wrap centered">
+      <table>
+        <caption>Accuracy by threshold test</caption>
+        <thead>
+          <tr><th>Method</th><th>High PRI accuracy</th><th>Low PRI accuracy</th><th>Combined accuracy</th><th>Sample (high / low)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>No wRC+ filter</td><td>64.6%</td><td>79.8%</td><td><strong>71.1%</strong></td><td>305 / 228</td></tr>
+          <tr><td>Test 1: wRC+ 100 split</td><td>73.0%</td><td>85.5%</td><td><strong>78.3%</strong></td><td>233 / 173</td></tr>
+          <tr><td>Test 2: wRC+ 90 / 110 split</td><td>78.2%</td><td>91.2%</td><td><strong>83.6%</strong></td><td>188 / 136</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div style="max-width:calc(72ch - 48px); margin:0 auto;">
         <div class="callout" style="margin-top:20px;">The tighter split leaves a smaller sample, but the metric's success rate goes up.</div>
 
         <h3 class="subhead">Putting it into practice</h3>
