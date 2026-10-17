@@ -36,30 +36,17 @@
   <section class="pagehero">
     <div class="wrap" style="max-width:72ch;">
       <p class="eyebrow">Results</p>
-      <h1>Four seasons of data</h1>
-      <p style="opacity:.75;">1,423 qualified player-seasons, 2021&ndash;2024. All figures use the four-input PoR score (BA, SLG, wOBA, BABIP).</p>
+      <h1>Testing the Accuracy of PRI</h1>
+      <p style="opacity:.75;">1,423 qualified player-seasons across five seasons, 2021&ndash;2026. All figures use the four-input PoR score (BA, SLG, wOBA, BABIP).</p>
     </div>
   </section>
 
   <section>
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Why it exists</p>
-        <h2>Batting average lies to you at least once a season.</h2>
-        <p>A hitter can scorch the ball all year and have nothing to show for it, or
-        get bloop singles all August and look like a star. PoR isolates that gap —
-        actual outcomes minus expected outcomes on contact — and turns it into a
-        single 0–100 score.</p>
-      </div>
-
-      <div class="grid-3">
+      <div class="grid-2">
         <div class="card">
           <div class="num">1,423</div>
-          <div class="cap">qualified player-seasons tested, 2021–2024</div>
-        </div>
-        <div class="card">
-          <div class="num">4</div>
-          <div class="cap">inputs: BA, SLG, wOBA, and BABIP vs. expected</div>
+          <div class="cap">qualified player-seasons tested across five seasons, 2021–2026</div>
         </div>
         <div class="card">
           <div class="num">94.3%</div>
@@ -67,7 +54,25 @@
         </div>
       </div>
 
-      <div class="grid-2" style="margin-top:24px;">
+      <div style="max-width:65ch; margin-top:48px;">
+        <h2>Importance of wRC+ thresholds</h2>
+        <p>The PRI metric was tested on over 1,400 qualified player-seasons across five seasons (2021&ndash;2026), with the
+        goal of measuring how accurately it predicts whether a hitter will progress or
+        regress in offensive production the following season. Throughout testing, we
+        found that applying a wRC+ threshold greatly increases that accuracy.</p>
+
+        <p>Take Juan Soto in 2024. His PRI score of 65.5 signaled that he was due for
+        progression, but he also posted a wRC+ of about 180 that year. That doesn't
+        mean he couldn't have been better, but a jump from that level is rare. Limiting
+        progression candidates to hitters with a wRC+ of 100 or lower improved accuracy
+        immensely, and tightening the cutoff to 90 or lower improved it even further.</p>
+
+        <p>It works the opposite way for hitters predicted to regress. Accuracy is
+        significantly higher when a low PRI score is paired with a wRC+ of 100 or
+        higher, and higher still at 110 or higher.</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:32px;">
         <div class="card" style="padding:28px;">
           <h3>Progression candidates</h3>
           <p>Below-average hitters (wRC+ &lt; 100) who got unlucky — high PoR score,
@@ -181,8 +186,8 @@
           <div class="cap">accuracy gained on regression detection after adding BABIP as a fourth input</div>
         </div>
         <div class="card">
-          <div class="num">2021&ndash;24</div>
-          <div class="cap">seasons tested; 2019&ndash;20 excluded due to the shortened COVID follow-up year</div>
+          <div class="num">2021&ndash;26</div>
+          <div class="cap">five seasons tested; 2019&ndash;20 excluded due to the shortened COVID follow-up year</div>
         </div>
       </div>
     </div>
@@ -191,7 +196,7 @@
 
 <footer class="site">
   <div class="wrap">
-    <div class="fine">PoR &middot; built on public Baseball Savant &amp; FanGraphs data, 2021&ndash;2024</div>
+    <div class="fine">PoR &middot; built on public Baseball Savant &amp; FanGraphs data, 2021&ndash;2026</div>
     <div style="display:flex; gap:20px;">
       <a href="index.html">Home</a>
       <a href="article.html">Article</a>
