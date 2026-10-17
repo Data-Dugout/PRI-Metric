@@ -23,7 +23,7 @@
   .rule{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:3px; margin-top:10px; line-height:1.45;}
   .rule.hi{background:rgba(35,75,54,.10); border-left:4px solid var(--turf-700);}
   .rule.lo{background:rgba(181,89,46,.10); border-left:4px solid var(--clay-500);}
-  .rule .k{min-width:96px; font-family:'IBM Plex Mono',monospace; font-size:.78rem; font-weight:700; text-transform:uppercase; padding-top:2px;}
+  .rule .k{min-width:120px; font-family:'IBM Plex Mono',monospace; font-size:.78rem; font-weight:700; text-transform:uppercase; padding-top:2px;}
   .rule.hi .k{color:var(--turf-700);}
   .rule.lo .k{color:var(--clay-500);}
   @media (max-width:760px){ .tests{grid-template-columns:1fr;} }
@@ -188,7 +188,8 @@
         <h2 style="margin-top:40px;">Importance of wRC+ thresholds</h2>
         <p>I tested two threshold levels, using the prior-year wRC+ to filter PRI
         predictions. The first was the league average of 100. The second tightened it
-        to 90 and 110.</p>
+        to 90 and 110. These tests filtered players with a PRI above 60 as progression
+        candidates, and players with a PRI of 40 and below as regression candidates.</p>
       </div>
 
       <div class="tests">
@@ -196,15 +197,15 @@
           <p class="tag">Test 1</p>
           <h3>League-average split</h3>
           <p class="sub">wRC+ cutoff of 100</p>
-          <div class="rule hi"><span class="k">High PRI<br>60+</span><span>Projected to increase. Must have a wRC+ <strong>below 100</strong>.</span></div>
-          <div class="rule lo"><span class="k">Low PRI<br>40 or below</span><span>Projected to decrease. Must have a wRC+ <strong>above 100</strong>.</span></div>
+          <div class="rule hi"><span class="k">Players with<br>High PRI<br>(above 60)</span><span>Projected to increase. Must have a wRC+ <strong>below 100</strong>.</span></div>
+          <div class="rule lo"><span class="k">Players with<br>Low PRI<br>(40 and below)</span><span>Projected to decrease. Must have a wRC+ <strong>above 100</strong>.</span></div>
         </div>
         <div class="card">
           <p class="tag">Test 2</p>
           <h3>Tighter split</h3>
           <p class="sub">wRC+ cutoffs of 90 and 110</p>
-          <div class="rule hi"><span class="k">High PRI<br>60+</span><span>Projected to increase. Must have a wRC+ <strong>below 90</strong>.</span></div>
-          <div class="rule lo"><span class="k">Low PRI<br>40 or below</span><span>Projected to decrease. Must have a wRC+ <strong>above 110</strong>.</span></div>
+          <div class="rule hi"><span class="k">Players with<br>High PRI<br>(above 60)</span><span>Projected to increase. Must have a wRC+ <strong>below 90</strong>.</span></div>
+          <div class="rule lo"><span class="k">Players with<br>Low PRI<br>(40 and below)</span><span>Projected to decrease. Must have a wRC+ <strong>above 110</strong>.</span></div>
         </div>
       </div>
 
