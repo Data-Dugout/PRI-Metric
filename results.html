@@ -77,7 +77,7 @@
         </div>
       </div>
 
-      <h2 style="max-width:calc(72ch - 48px); margin-left:auto; margin-right:auto;">Phase 1: PRI Testing</h2>
+      <div style="max-width:calc(72ch - 48px); margin:0 auto;"><h2>Phase 1: PRI Testing</h2></div>
       <p style="max-width:calc(72ch - 48px); margin-left:auto; margin-right:auto;">The below charts show the compiled results from 2021&ndash;2026 of some key
       testing points. First, the percentage of players who improved their wRC+ the next season, with the PRI
       score ranges across the x-axis. This shows the trend and correlation between PRI and offensive production.</p>
@@ -155,6 +155,12 @@
         discovered that a significant number of players with a score above 60 who did not
         improve had a high wRC+ the year prior.</p>
 
+        <p>Take Juan Soto in 2024. His PRI score of 65.5 signaled that he was due for
+        progression, but he also posted a wRC+ of about 180 that year. That doesn't
+        mean he couldn't have been better, but a jump from that level is rare. Limiting
+        progression candidates to hitters with a wRC+ of 100 or lower improved accuracy
+        immensely, and tightening the cutoff to 90 or lower improved it even further.</p>
+
         <p>The next tests we conducted were to find what thresholds can strengthen the
         prediction. This is independent of the PRI score itself, but rather strengthens
         the confidence. For example, a player with a 70 PRI has about a 75% chance to
@@ -168,20 +174,23 @@
         (which he did).</p>
 
         <h2 style="margin-top:40px;">Importance of wRC+ thresholds</h2>
-        <p>The PRI metric was tested on over 1,400 qualified player-seasons across five seasons (2021&ndash;2026), with the
-        goal of measuring how accurately it predicts whether a hitter will progress or
-        regress in offensive production the following season. Throughout testing, we
-        found that applying a wRC+ threshold greatly increases that accuracy.</p>
+        <p>I created two different threshold levels for testing. The first was the league
+        average level of 100.</p>
 
-        <p>Take Juan Soto in 2024. His PRI score of 65.5 signaled that he was due for
-        progression, but he also posted a wRC+ of about 180 that year. That doesn't
-        mean he couldn't have been better, but a jump from that level is rare. Limiting
-        progression candidates to hitters with a wRC+ of 100 or lower improved accuracy
-        immensely, and tightening the cutoff to 90 or lower improved it even further.</p>
+        <ul style="padding-left:22px; margin:0 0 20px;">
+          <li style="margin-bottom:8px;">Players with a high PRI score (projected to increase offensively) must have a wRC+ below 100</li>
+          <li>Players with a low PRI score (projected to decrease offensively) must have a wRC+ above 100</li>
+        </ul>
 
-        <p>It works the opposite way for hitters predicted to regress. Accuracy is
-        significantly higher when a low PRI score is paired with a wRC+ of 100 or
-        higher, and higher still at 110 or higher.</p>
+        <p>I did another test with different levels that looked like this:</p>
+
+        <ul style="padding-left:22px; margin:0 0 20px;">
+          <li style="margin-bottom:8px;">Players with a high PRI score with a wRC+ below 90</li>
+          <li>Players with a low PRI score with a wRC+ above 110</li>
+        </ul>
+
+        <p>Of course, this lowered the sample size to a smaller group, but it increased the
+        success of the metric.</p>
       </div>
 
       <div class="grid-2" style="margin-top:32px;">
