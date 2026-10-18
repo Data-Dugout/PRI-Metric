@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PoR — Progression or Regression | Player Leaderboard</title>
-<meta name="description" content="PoR is a predictive metric that identifies which MLB hitters are due to improve or decline, built from four seasons of batted-ball luck data.">
+<title>PRI — Progression or Regression Index | Player Leaderboard</title>
+<meta name="description" content="PRI is a predictive metric that identifies which MLB hitters are due to improve or decline, built from five seasons of batted-ball luck data.">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
@@ -98,7 +98,7 @@
     border-left:2px solid var(--ink-900);
   }
 
-  /* PoR-only mode: hide every stat column past PoR */
+  /* PRI-only mode: hide every stat column past PRI */
   #leaderboard.por-only .grouprow{display:none;}
   #leaderboard.por-only th:nth-child(n+5),
   #leaderboard.por-only td:nth-child(n+5){display:none;}
@@ -137,7 +137,7 @@
   .dualstat-cap{font-size:.82rem; opacity:.8; margin-top:6px; line-height:1.4;}
   .dualstat-cap .mono{font-family:'IBM Plex Mono',monospace; font-size:.92em; opacity:.75;}
 
-  /* diverging bar chart: avg wRC+ change by PoR range */
+  /* diverging bar chart: avg wRC+ change by PRI range */
   .wrc-title{
     font-family:'IBM Plex Mono',monospace; font-size:.72rem; text-transform:uppercase;
     letter-spacing:.06em; color:var(--turf-900); opacity:.75; margin:0 0 10px;
@@ -159,7 +159,7 @@
 <header class="site">
   <nav class="nav">
     <a href="index.html" class="brandlink">
-      <span class="brand">PoR <span>/</span> Progression or Regression</span>
+      <span class="brand">PRI <span>/</span> Progression or Regression Index</span>
       <span class="tagline">By The Data Dugout</span>
     </a>
     <button class="navtoggle" aria-label="Toggle navigation">Menu</button>
@@ -181,14 +181,14 @@
     <div class="wrap-lb intro-grid">
       <div>
         <p style="font-size:1.15rem; max-width:52ch; opacity:.85; margin:0;">
-          <strong style="color:var(--turf-900);">PoR (Progression or Regression)</strong>
+          <strong style="color:var(--turf-900);">PRI (Progression or Regression Index)</strong>
           predicts and measures a player's offensive changes from year to year. The
           metric is built on a combination of expected stats that have been back
           tested for five years.
         </p>
         <div class="intro-links">
-          <a href="methodology.html">Read about the PoR's Formula &rarr;</a>
-          <a href="results.html">Read about Testing and Accuracy of PoR &rarr;</a>
+          <a href="methodology.html">Read about the PRI's Formula &rarr;</a>
+          <a href="results.html">Read about Testing and Accuracy of PRI &rarr;</a>
         </div>
 
         <details class="expl">
@@ -226,8 +226,8 @@
 
         <hr>
 
-        <p class="wrc-title">Average wRC+ Change by PoR Score Range</p>
-        <div class="wrc-chart" role="img" aria-label="Diverging bar chart of average wRC+ change by PoR score range, from +39.7 at 90-80 down to -57.3 at 10-0">
+        <p class="wrc-title">Average wRC+ Change by PRI Score Range</p>
+        <div class="wrc-chart" role="img" aria-label="Diverging bar chart of average wRC+ change by PRI score range, from +39.7 at 90-80 down to -57.3 at 10-0">
           <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:84px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">100-90</div></div>
           <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:90px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">90-80</div></div>
           <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:51px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">80-70</div></div>
@@ -281,7 +281,7 @@
           <label class="toggle">
             <input type="checkbox" id="f-poronly">
             <span class="track"></span>
-            <span class="tlabel">PoR only</span>
+            <span class="tlabel">PRI only</span>
           </label>
         </div>
         <button class="reset" id="reset-filters">Reset filters</button>
@@ -328,7 +328,7 @@
               <th data-key="Name" data-type="string">Name <span class="arrow">&#8597;</span></th>
               <th data-key="Team" data-type="string">Team <span class="arrow">&#8597;</span></th>
               <th data-key="PA" data-type="number">PA <span class="arrow">&#8597;</span></th>
-              <th data-key="PoR" data-type="number">PoR <span class="arrow">&#8597;</span></th>
+              <th data-key="PoR" data-type="number">PRI <span class="arrow">&#8597;</span></th>
               <th data-key="BA" data-type="number">BA <span class="arrow">&#8597;</span></th>
               <th data-key="xBA" data-type="number">xBA <span class="arrow">&#8597;</span></th>
               <th data-key="BA_Diff" data-type="number">BA Diff <span class="arrow">&#8597;</span></th>
@@ -352,7 +352,7 @@
 
 <footer class="site">
   <div class="wrap">
-    <div class="fine">PoR &middot; built on public Baseball Savant &amp; FanGraphs data, 2021&ndash;2026</div>
+    <div class="fine">PRI &middot; built on public Baseball Savant &amp; FanGraphs data, 2021&ndash;2026</div>
     <div style="display:flex; gap:20px;">
       <a href="article.html">Article</a>
       <a href="results.html">Results</a>
