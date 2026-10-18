@@ -28,6 +28,22 @@
   .rule.lo .k{color:var(--clay-500);}
   @media (max-width:760px){ .tests{grid-template-columns:1fr;} }
   h3.subhead{font-size:1.5rem; margin:40px 0 12px;}
+  .mv-bar{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; background:var(--cream-050); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin:28px 0 20px;}
+  .mv-bar .field{display:flex; flex-direction:column; gap:5px;}
+  .mv-bar label{font-family:'IBM Plex Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--turf-900);}
+  .mv-bar select, .mv-bar input{font-family:'Public Sans',sans-serif; font-size:.9rem; padding:8px 10px; border:1px solid var(--ink-900); border-radius:var(--radius); background:#fff; color:var(--ink-900); min-width:120px;}
+  .mv-bar input{width:120px; min-width:0;}
+  .mv-note{font-size:.85rem; opacity:.75; margin:0 0 12px; font-family:'IBM Plex Mono',monospace;}
+  .mv-card .num.up{color:var(--turf-700);}
+  .mv-card .num.down{color:var(--clay-500);}
+  .mv-tables{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:8px;}
+  .mv-tables table{margin:10px 0 0; font-size:.88rem;}
+  .mv-tables caption.up{color:var(--turf-700);}
+  .mv-tables td.pri-hi{color:var(--turf-700); font-weight:700;}
+  .mv-tables td.pri-lo{color:var(--clay-500); font-weight:700;}
+  .mv-tables td{white-space:nowrap;}
+  .mv-tables td.pl{font-family:'Public Sans',sans-serif; font-weight:600; white-space:nowrap;}
+  @media (max-width:860px){ .mv-tables{grid-template-columns:1fr;} }
   .chartblock{margin:40px 0 0;}
   .chartblock h3{margin:0 0 4px;}
   .chartblock .axis{font-size:.8rem; opacity:.7; margin:10px 0 0; text-align:center; font-family:'IBM Plex Mono', monospace;}
@@ -293,6 +309,174 @@
       <p class="eyebrow" style="margin-top:8px;">High PoR = progression candidates &middot; Low PoR = regression candidates</p>
     </div>
   </section>
+  <section id="movers">
+    <div class="wrap">
+      <div style="max-width:calc(72ch - 48px); margin:0 auto;">
+        <h2>Phase 3: The Biggest Movers</h2>
+        <p>Phases 1 and 2 tested PRI across every qualified hitter. Phase 3 puts names to the
+        numbers: from one season to the next, which hitters improved the most, which declined
+        the most, and what PRI score did they carry the year before? Pick a season, a stat,
+        and a plate appearance minimum to explore it yourself.</p>
+      </div>
+
+      <div class="mv-bar">
+        <div class="field"><label for="mv-season">Season change</label><select id="mv-season"></select></div>
+        <div class="field"><label for="mv-stat">Stat</label>
+          <select id="mv-stat">
+            <option value="wRC">wRC+</option>
+            <option value="AVG">AVG</option>
+            <option value="SLG">SLG</option>
+            <option value="OPS">OPS</option>
+            <option value="WAR">WAR</option>
+          </select></div>
+        <div class="field"><label for="mv-pa">Min. PA (both seasons)</label><input type="number" id="mv-pa" value="400" min="0" step="50"></div>
+        <div class="field"><label for="mv-n">Players per group</label>
+          <select id="mv-n"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></div>
+      </div>
+
+      <p class="mv-note" id="mv-count">Loading data&hellip;</p>
+
+      <div class="grid-2 mv-card-row">
+        <div class="card mv-card"><div class="num up" id="mv-up-num">&ndash;</div><div class="cap" id="mv-up-cap">Average PRI of the biggest improvers</div></div>
+        <div class="card mv-card"><div class="num down" id="mv-down-num">&ndash;</div><div class="cap" id="mv-down-cap">Average PRI of the biggest decliners</div></div>
+      </div>
+
+      <div class="mv-tables">
+        <div class="table-wrap">
+          <table>
+            <caption class="up" id="mv-up-title">Biggest improvers</caption>
+            <thead><tr><th>Player</th><th>Season</th><th>PRI</th><th id="mv-up-h">Change</th><th>PA</th></tr></thead>
+            <tbody id="mv-up-body"></tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption id="mv-down-title">Biggest decliners</caption>
+            <thead><tr><th>Player</th><th>Season</th><th>PRI</th><th id="mv-down-h">Change</th><th>PA</th></tr></thead>
+            <tbody id="mv-down-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="max-width:calc(72ch - 48px); margin:16px auto 0;">
+        <p style="font-size:.85rem; opacity:.75;">Change is the later season minus the earlier season. PRI is the score from the
+        earlier season. PA shows plate appearances in the earlier and later seasons. PRI above 60 is
+        shown in green and 40 and below in orange, matching the cutoffs used in Phase 2.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  (function () {
+    var STATS = {
+      wRC: {label: 'wRC+', dec: 1}, AVG: {label: 'AVG', dec: 3}, SLG: {label: 'SLG', dec: 3},
+      OPS: {label: 'OPS', dec: 3}, WAR: {label: 'WAR', dec: 1}
+    };
+    var rows = [];
+    var $ = function (id) { return document.getElementById(id); };
+
+    function splitLine(line) {
+      var out = [], cur = '', q = false;
+      for (var i = 0; i < line.length; i++) {
+        var c = line[i];
+        if (c === '"') { q = !q; }
+        else if (c === ',' && !q) { out.push(cur); cur = ''; }
+        else { cur += c; }
+      }
+      out.push(cur);
+      return out;
+    }
+    function parse(text) {
+      var lines = text.trim().split(/\r?\n/), head = splitLine(lines[0]), res = [];
+      for (var i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        var cells = splitLine(lines[i]), r = {};
+        head.forEach(function (h, k) { r[h.trim()] = cells[k] !== undefined ? cells[k].trim() : ''; });
+        ['PRI', 'PA_Prev', 'PA_Next', 'AVG', 'SLG', 'OPS', 'wRC', 'WAR'].forEach(function (k) { r[k] = parseFloat(r[k]); });
+        rows.push(r);
+      }
+    }
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function fmt(v, dec) {
+      var a = Math.abs(v).toFixed(dec);
+      return (v < 0 ? '\u2212' : '+') + a;
+    }
+    function priClass(v) { return v > 60 ? 'pri-hi' : (v <= 40 ? 'pri-lo' : ''); }
+    function avg(a) { return a.reduce(function (s, r) { return s + r.PRI; }, 0) / a.length; }
+
+    function body(el, list, key, dec) {
+      el.innerHTML = list.map(function (r) {
+        return '<tr><td class="pl">' + esc(r.Player) + '</td><td>' + esc(r.Season) + '</td><td class="' + priClass(r.PRI) + '">' +
+          r.PRI.toFixed(1) + '</td><td>' + fmt(r[key], dec) + '</td><td>' + r.PA_Prev + ' / ' + r.PA_Next + '</td></tr>';
+      }).join('');
+    }
+
+    function render() {
+      var season = $('mv-season').value, key = $('mv-stat').value, cfg = STATS[key];
+      var minPA = parseFloat($('mv-pa').value); if (isNaN(minPA) || minPA < 0) minPA = 0;
+      var n = parseInt($('mv-n').value, 10);
+      var seasons = season === 'all' ? uniqueSeasons() : [season];
+      var ups = [], downs = [], eligibleTotal = 0;
+      seasons.forEach(function (s) {
+        var el = rows.filter(function (r) { return r.Season === s && r.PA_Prev >= minPA && r.PA_Next >= minPA && !isNaN(r[key]); });
+        eligibleTotal += el.length;
+        el.sort(function (a, b) { return b[key] - a[key]; });
+        var k = Math.min(n, Math.floor(el.length / 2));
+        ups = ups.concat(el.slice(0, k));
+        downs = downs.concat(el.slice(el.length - k).reverse());
+      });
+      ups.sort(function (a, b) { return b[key] - a[key]; });
+      downs.sort(function (a, b) { return a[key] - b[key]; });
+
+      $('mv-up-h').textContent = cfg.label + ' change';
+      $('mv-down-h').textContent = cfg.label + ' change';
+      $('mv-up-title').textContent = 'Biggest improvers \u2014 ' + cfg.label;
+      $('mv-down-title').textContent = 'Biggest decliners \u2014 ' + cfg.label;
+
+      if (!ups.length) {
+        $('mv-count').textContent = 'No hitters meet that plate appearance minimum. Try a lower number.';
+        $('mv-up-num').textContent = '\u2013'; $('mv-down-num').textContent = '\u2013';
+        $('mv-up-cap').textContent = 'Average PRI of the biggest improvers';
+        $('mv-down-cap').textContent = 'Average PRI of the biggest decliners';
+        $('mv-up-body').innerHTML = ''; $('mv-down-body').innerHTML = '';
+        return;
+      }
+      $('mv-count').textContent = eligibleTotal.toLocaleString() + ' hitters meet the ' + minPA + '+ PA minimum in both seasons' +
+        (season === 'all' ? ' (top and bottom ' + n + ' from each season change)' : '') + '.';
+      $('mv-up-num').textContent = avg(ups).toFixed(1);
+      $('mv-down-num').textContent = avg(downs).toFixed(1);
+      var upHi = ups.filter(function (r) { return r.PRI > 50; }).length;
+      var downLo = downs.filter(function (r) { return r.PRI < 50; }).length;
+      $('mv-up-cap').textContent = 'Average PRI of the ' + ups.length + ' biggest improvers \u00b7 ' + upHi + ' of ' + ups.length + ' above 50';
+      $('mv-down-cap').textContent = 'Average PRI of the ' + downs.length + ' biggest decliners \u00b7 ' + downLo + ' of ' + downs.length + ' below 50';
+      body($('mv-up-body'), ups, key, cfg.dec);
+      body($('mv-down-body'), downs, key, cfg.dec);
+    }
+
+    function uniqueSeasons() {
+      var seen = {}, out = [];
+      rows.forEach(function (r) { if (!seen[r.Season]) { seen[r.Season] = 1; out.push(r.Season); } });
+      return out.sort();
+    }
+
+    fetch('data/movers.csv').then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function (text) {
+      parse(text);
+      var sel = $('mv-season');
+      sel.innerHTML = '<option value="all">All seasons</option>' + uniqueSeasons().map(function (s) {
+        return '<option value="' + s + '">' + s.replace('-', '\u2192') + '</option>';
+      }).join('');
+      ['mv-season', 'mv-stat', 'mv-n'].forEach(function (id) { $(id).addEventListener('change', render); });
+      $('mv-pa').addEventListener('input', render);
+      render();
+    }).catch(function () {
+      $('mv-count').textContent = 'Could not load data/movers.csv. Make sure the file is uploaded to the data folder.';
+    });
+  })();
+  </script>
+
   <section>
     <div class="wrap" style="text-align:center;">
       <p style="margin-bottom:16px;">Enjoy this research? You can support The Data Dugout here.</p>
