@@ -39,10 +39,12 @@
   .mv-tables{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:8px;}
   .mv-tables table{margin:10px 0 0; font-size:.88rem;}
   .mv-tables caption.up{color:var(--turf-700);}
-  .mv-tables td.pri-hi{color:var(--turf-700); font-weight:700;}
-  .mv-tables td.pri-lo{color:var(--clay-500); font-weight:700;}
-  .mv-tables td{white-space:nowrap;}
-  .mv-tables td.pl{font-family:'Public Sans',sans-serif; font-weight:600; white-space:nowrap;}
+  .mv-tables td.pri{font-weight:700; text-align:center;}
+  .mv-legend{display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:.72rem; margin:0 0 6px;}
+  .mv-legend span{padding:3px 8px; border-radius:2px; font-weight:600;}
+  .mv-tables th, .mv-tables td{padding:9px 7px; font-size:.84rem; white-space:nowrap;}
+  .mv-tables td.pl{white-space:normal;}
+  .mv-tables td.pl{font-family:'Public Sans',sans-serif; font-weight:600;}
   @media (max-width:860px){ .mv-tables{grid-template-columns:1fr;} }
   .chartblock{margin:40px 0 0;}
   .chartblock h3{margin:0 0 4px;}
@@ -360,8 +362,18 @@
 
       <div style="max-width:calc(72ch - 48px); margin:16px auto 0;">
         <p style="font-size:.85rem; opacity:.75;">Change is the later season minus the earlier season. PRI is the score from the
-        earlier season. PA shows plate appearances in the earlier and later seasons. PRI above 60 is
-        shown in green and 40 and below in orange, matching the cutoffs used in Phase 2.</p>
+        earlier season. PA shows plate appearances in the earlier and later seasons. PRI is color-coded the same way as
+        the leaderboard, from green (high PRI, projected to progress) to red (low PRI, projected to regress):</p>
+        <div class="mv-legend">
+          <span style="background:#B93A30;color:#FAF7EF;">&lt; 20</span>
+          <span style="background:#E0655A;color:#FAF7EF;">20&ndash;34</span>
+          <span style="background:#F0A79C;">35&ndash;44</span>
+          <span style="background:#F0D670;">45&ndash;54</span>
+          <span style="background:#C7E2A4;">55&ndash;64</span>
+          <span style="background:#8FC17E;">65&ndash;79</span>
+          <span style="background:#4C9950;color:#FAF7EF;">80&ndash;89</span>
+          <span style="background:#1B7A3D;color:#FAF7EF;">90+</span>
+        </div>
       </div>
     </div>
   </section>
@@ -401,12 +413,23 @@
       var a = Math.abs(v).toFixed(dec);
       return (v < 0 ? '\u2212' : '+') + a;
     }
-    function priClass(v) { return v > 60 ? 'pri-hi' : (v <= 40 ? 'pri-lo' : ''); }
+    function priStyle(v) {
+      var bg, color = '#1B2430';
+      if (v >= 90)      { bg = '#1B7A3D'; color = '#FAF7EF'; }
+      else if (v >= 80) { bg = '#4C9950'; color = '#FAF7EF'; }
+      else if (v >= 65) { bg = '#8FC17E'; }
+      else if (v >= 55) { bg = '#C7E2A4'; }
+      else if (v >= 45) { bg = '#F0D670'; }
+      else if (v >= 35) { bg = '#F0A79C'; }
+      else if (v >= 20) { bg = '#E0655A'; color = '#FAF7EF'; }
+      else              { bg = '#B93A30'; color = '#FAF7EF'; }
+      return 'background-color:' + bg + '; color:' + color + ';';
+    }
     function avg(a) { return a.reduce(function (s, r) { return s + r.PRI; }, 0) / a.length; }
 
     function body(el, list, key, dec) {
       el.innerHTML = list.map(function (r) {
-        return '<tr><td class="pl">' + esc(r.Player) + '</td><td>' + esc(r.Season) + '</td><td class="' + priClass(r.PRI) + '">' +
+        return '<tr><td class="pl">' + esc(r.Player) + '</td><td>' + esc(r.Season) + '</td><td class="pri" style="' + priStyle(r.PRI) + '">' +
           r.PRI.toFixed(1) + '</td><td>' + fmt(r[key], dec) + '</td><td>' + r.PA_Prev + ' / ' + r.PA_Next + '</td></tr>';
       }).join('');
     }
@@ -428,8 +451,8 @@
       ups.sort(function (a, b) { return b[key] - a[key]; });
       downs.sort(function (a, b) { return a[key] - b[key]; });
 
-      $('mv-up-h').textContent = cfg.label + ' change';
-      $('mv-down-h').textContent = cfg.label + ' change';
+      $('mv-up-h').textContent = 'Change';
+      $('mv-down-h').textContent = 'Change';
       $('mv-up-title').textContent = 'Biggest improvers \u2014 ' + cfg.label;
       $('mv-down-title').textContent = 'Biggest decliners \u2014 ' + cfg.label;
 
