@@ -1,323 +1,243 @@
-(function () {
-  var DATA_URL = 'data/players.csv';
-  var REQUIRED = ['Name','Year','PA','PRI','BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
-  var NUMERIC_COLS = ['PA','PRI','BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
-  var DECIMAL_COLS = ['BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
-  var TABLE_COLS = ['Name','Team','PA','PRI','BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRI Leaderboard</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .filterbar{
+    display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;
+    background:var(--cream-050); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:20px;
+  }
+  .filterbar .field{display:flex; flex-direction:column; gap:5px;}
+  .filterbar label{font-family:'IBM Plex Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--turf-900);}
+  .filterbar select{
+    font-family:'Public Sans',sans-serif; font-size:.9rem; padding:8px 10px;
+    border:1px solid var(--ink-900); border-radius:var(--radius); background:#fff; color:var(--ink-900);
+    min-width:130px;
+  }
+  .filterbar .reset{
+    background:none; border:1px solid var(--turf-900); color:var(--turf-900);
+    padding:8px 14px; border-radius:var(--radius); font-size:.85rem; cursor:pointer; height:fit-content;
+  }
+  .filterbar .reset:hover{background:var(--turf-900); color:var(--cream-100);}
+  .filterbar .export{
+    margin-left:auto; background:var(--turf-700); color:var(--cream-050);
+    border:none; padding:8px 16px; border-radius:var(--radius); font-size:.85rem;
+    font-weight:600; cursor:pointer; height:fit-content; display:flex; align-items:center; gap:7px;
+  }
+  .filterbar .export:hover{background:var(--turf-900);}
+  .filterbar .export svg{width:14px; height:14px;}
 
-  var allRows = [];
-  var lastFilteredRows = [];
-  var sortKey = 'PRI';
-  var sortDir = 'desc';
-  var hasTeam = false;
-
-  // Splits one CSV line, honouring "quoted, fields".
-  function splitLine(line) {
-    var out = [], cur = '', inQ = false;
-    for (var i = 0; i < line.length; i++) {
-      var ch = line.charAt(i);
-      if (inQ) {
-        if (ch === '"') {
-          if (line.charAt(i + 1) === '"') { cur += '"'; i++; } else { inQ = false; }
-        } else { cur += ch; }
-      } else if (ch === '"') { inQ = true; }
-      else if (ch === ',') { out.push(cur); cur = ''; }
-      else { cur += ch; }
-    }
-    out.push(cur);
-    return out;
+  .searchbar{position:relative; margin-bottom:20px; max-width:340px;}
+  .searchbar input{
+    width:100%; padding:11px 14px 11px 40px; font-size:.95rem;
+    font-family:'Public Sans',sans-serif; border:1px solid var(--ink-900);
+    border-radius:var(--radius); background:#fff; color:var(--ink-900); box-sizing:border-box;
+  }
+  .searchbar input:focus{outline:2px solid var(--amber-400); outline-offset:1px;}
+  .searchbar svg{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    width:16px; height:16px; color:var(--turf-900); opacity:.55; pointer-events:none;
+  }
+  #leaderboard th{cursor:pointer; white-space:nowrap; user-select:none;}
+  #leaderboard th .arrow{opacity:.4; font-size:.75em; margin-left:3px;}
+  #leaderboard th.sorted .arrow{opacity:1; color:var(--clay-500);}
+  #leaderboard td.name{font-family:'Public Sans',sans-serif; font-weight:600;}
+  .rowcount{font-family:'IBM Plex Mono',monospace; font-size:.82rem; opacity:.7; margin:0 0 12px;}
+  .placeholder-note{
+    background:#FCEFD8; border:1px solid var(--amber-400); border-radius:var(--radius);
+    padding:12px 16px; font-size:.88rem; margin-bottom:24px;
   }
 
-  function parseCSV(text) {
-    var lines = text.replace(/^﻿/, '').trim().split(/\r?\n/);
-    var headers = splitLine(lines[0]).map(function (h) { return h.trim(); });
-    var rows = [];
-    for (var i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      var cells = splitLine(lines[i]);
-      var row = {};
-      headers.forEach(function (h, idx) {
-        var raw = cells[idx] !== undefined ? cells[idx].trim() : '';
-        row[h] = NUMERIC_COLS.indexOf(h) !== -1 ? (raw === '' ? NaN : parseFloat(raw)) : raw;
-      });
-      rows.push(row);
-    }
-    return { headers: headers, rows: rows };
+  /* wider stage just for this page so 14 columns can fit without scrolling */
+  .wrap-lb{max-width:1360px; margin:0 auto; padding:0 24px;}
+
+  /* toggle switch */
+  .toggle-field{display:flex; flex-direction:column; gap:5px;}
+  .toggle{display:flex; align-items:center; gap:9px; cursor:pointer; height:38px;}
+  .toggle input{position:absolute; opacity:0; width:0; height:0;}
+  .toggle .track{
+    width:38px; height:21px; background:var(--line); border:1.5px solid var(--ink-900);
+    border-radius:999px; position:relative; transition:background .15s ease; flex:none;
+  }
+  .toggle .track::after{
+    content:''; position:absolute; top:1px; left:1px; width:15px; height:15px;
+    background:var(--cream-050); border-radius:50%; transition:transform .15s ease;
+  }
+  .toggle input:checked + .track{background:var(--turf-700);}
+  .toggle input:checked + .track::after{transform:translateX(17px); background:var(--amber-400);}
+  .toggle .tlabel{font-size:.88rem; font-weight:500;}
+
+  /* tighter table so it fits on one screen (desktop) */
+  #leaderboard{font-size:.82rem; table-layout:fixed; width:auto;}
+  #leaderboard th, #leaderboard td{padding:7px 9px;}
+  #leaderboard .grouprow th{
+    text-align:center; background:var(--cream-050); border-bottom:1px solid var(--line);
+    font-family:'IBM Plex Mono',monospace; font-size:.7rem; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--turf-900); cursor:default; padding:6px 4px;
+  }
+  #leaderboard .grouprow th.blank{background:transparent; border-bottom:none;}
+
+  /* vertical section lines, matching a Savant-style box score */
+  #leaderboard th:nth-child(5), #leaderboard td:nth-child(5),
+  #leaderboard th:nth-child(8), #leaderboard td:nth-child(8),
+  #leaderboard th:nth-child(11), #leaderboard td:nth-child(11),
+  #leaderboard th:nth-child(14), #leaderboard td:nth-child(14){
+    border-left:2px solid var(--ink-900);
   }
 
-  // Safety net: checks the file before it reaches the table and reports problems on the page.
-  function validate(parsed) {
-    var warnings = [];
-    var missing = REQUIRED.filter(function (c) { return parsed.headers.indexOf(c) === -1; });
-    if (missing.length) {
-      warnings.push('The data file is missing column(s): ' + missing.join(', ') + '.');
-      return { rows: [], warnings: warnings };
-    }
-    var good = [], badPRI = 0, badPA = 0, noName = 0, seen = {}, dupes = 0;
-    parsed.rows.forEach(function (r) {
-      if (!r.Name) { noName++; return; }
-      if (isNaN(r.PRI) || r.PRI < 0 || r.PRI > 100) { badPRI++; return; }
-      if (isNaN(r.PA) || r.PA < 0) { badPA++; return; }
-      var key = r.Name + '|' + r.Year + '|' + r.PA;
-      if (seen[key]) { dupes++; return; }
-      seen[key] = true;
-      good.push(r);
-    });
-    if (noName) warnings.push(noName + ' row(s) with no player name were skipped.');
-    if (badPRI) warnings.push(badPRI + ' row(s) with a missing or out-of-range PRI (must be 0 to 100) were skipped.');
-    if (badPA) warnings.push(badPA + ' row(s) with a missing or invalid PA were skipped.');
-    if (dupes) warnings.push(dupes + ' duplicate row(s) were skipped.');
-    if (!good.length) warnings.push('No valid player rows were found in the data file.');
-    return { rows: good, warnings: warnings };
-  }
+  /* PRI-only mode: hide every stat column past PRI */
+  #leaderboard.por-only .grouprow{display:none;}
+  #leaderboard.por-only th:nth-child(n+5),
+  #leaderboard.por-only td:nth-child(n+5){display:none;}
+</style>
+</head>
+<body>
 
-  function showWarnings(warnings) {
-    if (!warnings.length) return;
-    var el = document.createElement('div');
-    el.className = 'data-warning';
-    el.setAttribute('role', 'alert');
-    el.style.cssText = 'background:#FBE9E6; border:1px solid #B93A30; color:#7A1F17; border-radius:8px; padding:12px 16px; margin:0 0 16px; font-size:.9rem; line-height:1.5;';
-    el.innerHTML = '<strong>Data check:</strong> ' + warnings.join(' ') +
-      ' The table below may be incomplete &mdash; the site owner has been flagged to fix the data file.';
-    var bar = document.querySelector('#leaderboard').closest('.wrap-lb').querySelector('.filterbar');
-    bar.parentNode.insertBefore(el, bar);
-  }
+<header class="site">
+  <nav class="nav">
+    <a href="index.html" class="brandlink">
+      <span class="brand">PRI <span>/</span> Progression or Regression Index</span>
+      <span class="tagline">By The Data Dugout</span>
+    </a>
+    <button class="navtoggle" aria-label="Toggle navigation">Menu</button>
+    <ul class="navlinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="article.html">The Article</a></li>
+      <li><a href="methodology.html">Methodology</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
+</header>
 
-  function uniqueSorted(rows, key) {
-    var set = {};
-    rows.forEach(function (r) { if (r[key]) set[r[key]] = true; });
-    return Object.keys(set).sort();
-  }
+<main>
+  <section class="pagehero">
+    <div class="wrap" style="max-width:72ch;">
+      <p class="eyebrow">Leaderboard</p>
+      <h1>PRI Player Table</h1>
+      <p style="opacity:.75;">Filter by year, team, position, and playing time. Click any column header to sort.</p>
+    </div>
+  </section>
 
-  function populateFilter(selectEl, values) {
-    values.forEach(function (v) {
-      var opt = document.createElement('option');
-      opt.value = v;
-      opt.textContent = v;
-      selectEl.appendChild(opt);
-    });
-  }
+  <section>
+    <div class="wrap-lb">
 
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
+      <div class="filterbar">
+        <div class="field">
+          <label for="f-year">Year</label>
+          <select id="f-year"><option value="">All</option></select>
+        </div>
+        <div class="field">
+          <label for="f-team">Team</label>
+          <select id="f-team"><option value="">All</option></select>
+        </div>
+        <div class="field">
+          <label for="f-pos">Position</label>
+          <select id="f-pos"><option value="">All</option></select>
+        </div>
+        <div class="field">
+          <label for="f-pa">Min. PA</label>
+          <select id="f-pa">
+            <option value="0">All</option>
+            <option value="100">100+</option>
+            <option value="200">200+</option>
+            <option value="300">300+</option>
+            <option value="400">400+</option>
+            <option value="500">500+</option>
+          </select>
+        </div>
+        <div class="toggle-field">
+          <label>&nbsp;</label>
+          <label class="toggle">
+            <input type="checkbox" id="f-poronly">
+            <span class="track"></span>
+            <span class="tlabel">PRI only</span>
+          </label>
+        </div>
+        <button class="reset" id="reset-filters">Reset filters</button>
+        <button class="export" id="export-csv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export to Excel
+        </button>
+      </div>
 
-  function formatCell(key, value) {
-    if (value === undefined || value === null || value === '' || (typeof value === 'number' && isNaN(value))) return '&mdash;';
-    if (key === 'PRI') return Number(value).toFixed(1);
-    if (DECIMAL_COLS.indexOf(key) !== -1) {
-      var s = Number(value).toFixed(3);
-      return (value >= 0 && key.indexOf('Diff') !== -1 ? '+' : '') + s;
-    }
-    return esc(value);
-  }
+      <div class="searchbar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="f-search" placeholder="Search player name&hellip;" autocomplete="off">
+      </div>
 
-  function priStyle(value) {
-    if (value === undefined || value === null || isNaN(value)) return '';
-    var bg, color = '#1B2430';
-    if (value >= 90)      { bg = '#1B7A3D'; color = '#FAF7EF'; }
-    else if (value >= 80) { bg = '#4C9950'; color = '#FAF7EF'; }
-    else if (value >= 65) { bg = '#8FC17E'; }
-    else if (value >= 55) { bg = '#C7E2A4'; }
-    else if (value >= 45) { bg = '#F0D670'; }
-    else if (value >= 35) { bg = '#F0A79C'; }
-    else if (value >= 20) { bg = '#E0655A'; color = '#FAF7EF'; }
-    else                  { bg = '#B93A30'; color = '#FAF7EF'; }
-    return 'background-color:' + bg + '; color:' + color + ';';
-  }
+      <p class="rowcount" id="rowcount">Loading player data&hellip;</p>
 
-  function exportToCSV() {
-    var cols = ['Name','Year'].concat(hasTeam ? ['Team'] : []).concat(['PA','PRI','BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP']);
-    var labels = { BA_Diff: 'BA Diff', SLG_Diff: 'SLG Diff', OBA_Diff: 'OBA Diff' };
-    var headerLabels = cols.map(function (c) { return labels[c] || c; });
+      <div class="table-wrap">
+        <table id="leaderboard">
+          <colgroup>
+            <col style="width:140px;">
+            <col style="width:60px;">
+            <col style="width:60px;">
+            <col style="width:70px;">
+            <col style="width:65px;">
+            <col style="width:65px;">
+            <col style="width:78px;">
+            <col style="width:65px;">
+            <col style="width:65px;">
+            <col style="width:78px;">
+            <col style="width:65px;">
+            <col style="width:65px;">
+            <col style="width:78px;">
+            <col style="width:65px;">
+          </colgroup>
+          <thead>
+            <tr class="grouprow">
+              <th class="blank" colspan="4"></th>
+              <th colspan="3">Batting Average</th>
+              <th colspan="3">Slugging</th>
+              <th colspan="3">On Base Average</th>
+              <th class="blank" colspan="1"></th>
+            </tr>
+            <tr>
+              <th data-key="Name" data-type="string">Name <span class="arrow">&#8597;</span></th>
+              <th data-key="Team" data-type="string">Team <span class="arrow">&#8597;</span></th>
+              <th data-key="PA" data-type="number">PA <span class="arrow">&#8597;</span></th>
+              <th data-key="PRI" data-type="number">PRI <span class="arrow">&#8597;</span></th>
+              <th data-key="BA" data-type="number">BA <span class="arrow">&#8597;</span></th>
+              <th data-key="xBA" data-type="number">xBA <span class="arrow">&#8597;</span></th>
+              <th data-key="BA_Diff" data-type="number">BA Diff <span class="arrow">&#8597;</span></th>
+              <th data-key="SLG" data-type="number">SLG <span class="arrow">&#8597;</span></th>
+              <th data-key="xSLG" data-type="number">xSLG <span class="arrow">&#8597;</span></th>
+              <th data-key="SLG_Diff" data-type="number">SLG Diff <span class="arrow">&#8597;</span></th>
+              <th data-key="wOBA" data-type="number">wOBA <span class="arrow">&#8597;</span></th>
+              <th data-key="xwOBA" data-type="number">xwOBA <span class="arrow">&#8597;</span></th>
+              <th data-key="OBA_Diff" data-type="number">OBA Diff <span class="arrow">&#8597;</span></th>
+              <th data-key="BABIP" data-type="number">BABIP <span class="arrow">&#8597;</span></th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+          </tbody>
+        </table>
+      </div>
 
-    function csvEscape(val) {
-      var s = (val === undefined || val === null) ? '' : String(val);
-      if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
-        s = '"' + s.replace(/"/g, '""') + '"';
-      }
-      return s;
-    }
+    </div>
+  </section>
+</main>
+<!-- note: .wrap-lb replaces .wrap on this page only, for the wider table -->
 
-    var rows = lastFilteredRows.map(function (r) {
-      return cols.map(function (c) {
-        var v = r[c];
-        if (typeof v === 'number' && isNaN(v)) v = '';
-        return csvEscape(v);
-      }).join(',');
-    });
+<footer class="site">
+  <div class="wrap">
+    <div class="fine">PRI &middot; built on public Baseball Savant &amp; FanGraphs data, 2021&ndash;2026</div>
+    <div style="display:flex; gap:20px;">
+      <a href="index.html">Home</a>
+      <a href="results.html">Results</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+</footer>
 
-    var csv = headerLabels.map(csvEscape).join(',') + '\r\n' + rows.join('\r\n');
-    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    var stamp = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = 'pri-leaderboard-' + stamp + '.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function applyFiltersAndSort() {
-    var year = document.getElementById('f-year').value;
-    var team = document.getElementById('f-team').value;
-    var pos = document.getElementById('f-pos').value;
-    var minPA = parseInt(document.getElementById('f-pa').value, 10) || 0;
-    var search = document.getElementById('f-search').value.trim().toLowerCase();
-
-    var filtered = allRows.filter(function (r) {
-      if (year && String(r.Year) !== String(year)) return false;
-      if (team && r.Team !== team) return false;
-      if (pos && r.Position !== pos) return false;
-      if ((r.PA || 0) < minPA) return false;
-      if (search && (!r.Name || r.Name.toLowerCase().indexOf(search) === -1)) return false;
-      return true;
-    });
-
-    filtered.sort(function (a, b) {
-      var av = a[sortKey], bv = b[sortKey];
-      var cmp;
-      if (typeof av === 'number' && typeof bv === 'number') {
-        cmp = av - bv;
-      } else {
-        cmp = String(av).localeCompare(String(bv));
-      }
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-
-    lastFilteredRows = filtered;
-    renderRows(filtered, !year);
-    document.getElementById('rowcount').textContent =
-      filtered.length + (filtered.length === 1 ? ' player shown' : ' players shown') +
-      ' (out of ' + allRows.length + ' total)';
-  }
-
-  function renderRows(rows, showYear) {
-    var tbody = document.getElementById('leaderboard-body');
-    if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="' + (hasTeam ? 14 : 13) + '" style="text-align:center; opacity:.6; padding:24px;">No players match these filters.</td></tr>';
-      return;
-    }
-    var html = rows.map(function (r) {
-      var cells = TABLE_COLS.map(function (c) {
-        if (c === 'Name') {
-          var yr = showYear ? ' <span style="opacity:.55; font-size:.78em;">' + esc(r.Year) + '</span>' : '';
-          return '<td class="name">' + formatCell(c, r[c]) + yr + '</td>';
-        }
-        if (c === 'PRI') return '<td style="' + priStyle(r.PRI) + '">' + formatCell(c, r[c]) + '</td>';
-        return '<td>' + formatCell(c, r[c]) + '</td>';
-      }).join('');
-      return '<tr>' + cells + '</tr>';
-    }).join('');
-    tbody.innerHTML = html;
-  }
-
-  function updateSortHeaders() {
-    document.querySelectorAll('#leaderboard th[data-key]').forEach(function (th) {
-      th.classList.toggle('sorted', th.dataset.key === sortKey);
-      var arrow = th.querySelector('.arrow');
-      if (!arrow) return;
-      if (th.dataset.key === sortKey) {
-        arrow.innerHTML = sortDir === 'asc' ? '&uarr;' : '&darr;';
-      } else {
-        arrow.innerHTML = '&#8597;';
-      }
-    });
-  }
-
-  // Team / Position are optional: when the data file has none, hide their column and filters.
-  function applyOptionalColumns(rows) {
-    hasTeam = rows.some(function (r) { return r.Team; });
-    var hasPos = rows.some(function (r) { return r.Position; });
-    var table = document.getElementById('leaderboard');
-    if (!hasTeam) {
-      var style = document.createElement('style');
-      style.textContent = '#leaderboard thead tr:not(.grouprow) th:nth-child(2), #leaderboard td:nth-child(2){display:none;} #leaderboard td.name{white-space:nowrap;}';
-      document.head.appendChild(style);
-      var col = table.querySelector('colgroup col:nth-child(2)');
-      if (col) col.parentNode.removeChild(col);
-      var blank = table.querySelector('.grouprow th.blank');
-      if (blank) blank.setAttribute('colspan', '3');
-      document.getElementById('f-team').parentNode.style.display = 'none';
-    }
-    if (!hasPos) {
-      document.getElementById('f-pos').parentNode.style.display = 'none';
-    }
-  }
-
-  function init(rows) {
-    allRows = rows;
-    applyOptionalColumns(rows);
-    var years = uniqueSorted(rows, 'Year').sort(function (a, b) { return b - a; });
-    populateFilter(document.getElementById('f-year'), years);
-    populateFilter(document.getElementById('f-team'), uniqueSorted(rows, 'Team'));
-    populateFilter(document.getElementById('f-pos'), uniqueSorted(rows, 'Position'));
-
-    document.getElementById('f-year').addEventListener('change', applyFiltersAndSort);
-    document.getElementById('f-team').addEventListener('change', applyFiltersAndSort);
-    document.getElementById('f-pos').addEventListener('change', applyFiltersAndSort);
-    document.getElementById('f-pa').addEventListener('change', applyFiltersAndSort);
-    document.getElementById('f-search').addEventListener('input', applyFiltersAndSort);
-
-    var priOnly = document.getElementById('f-poronly');
-    priOnly.addEventListener('change', function () {
-      document.getElementById('leaderboard').classList.toggle('por-only', priOnly.checked);
-    });
-
-    // default Year to the newest season in the data file
-    var DEFAULT_YEAR = years.length ? years[0] : '';
-    var yearSelect = document.getElementById('f-year');
-    yearSelect.value = DEFAULT_YEAR;
-
-    document.getElementById('reset-filters').addEventListener('click', function () {
-      document.getElementById('f-year').value = DEFAULT_YEAR;
-      document.getElementById('f-team').value = '';
-      document.getElementById('f-pos').value = '';
-      document.getElementById('f-pa').value = '0';
-      document.getElementById('f-search').value = '';
-      priOnly.checked = false;
-      document.getElementById('leaderboard').classList.remove('por-only');
-      applyFiltersAndSort();
-    });
-
-    document.querySelectorAll('#leaderboard th[data-key]').forEach(function (th) {
-      th.addEventListener('click', function () {
-        var key = th.dataset.key;
-        if (sortKey === key) {
-          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          sortKey = key;
-          sortDir = 'desc';
-        }
-        updateSortHeaders();
-        applyFiltersAndSort();
-      });
-    });
-
-    document.getElementById('export-csv').addEventListener('click', exportToCSV);
-
-    updateSortHeaders();
-    applyFiltersAndSort();
-  }
-
-  fetch(DATA_URL)
-    .then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.text();
-    })
-    .then(function (text) {
-      var result = validate(parseCSV(text));
-      showWarnings(result.warnings);
-      if (!result.rows.length) {
-        document.getElementById('rowcount').textContent = 'No player data could be loaded.';
-        return;
-      }
-      init(result.rows);
-    })
-    .catch(function (err) {
-      document.getElementById('rowcount').textContent = 'Could not load player data (' + err + ').';
-      console.error(err);
-    });
-})();
+<script src="js/main.js"></script>
+<script src="js/leaderboard.js"></script>
+</body>
+</html>
