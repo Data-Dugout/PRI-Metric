@@ -5,11 +5,26 @@
   var DECIMAL_COLS = ['BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
   var TABLE_COLS = ['Name','Team','PA','PRI','BA','xBA','BA_Diff','SLG','xSLG','SLG_Diff','wOBA','xwOBA','OBA_Diff','BABIP'];
 
+  var YEARS = ['2026','2025','2024','2023','2022','2021'];
+  var TEAMS = [
+    ['ARI','Arizona Diamondbacks'],['ATL','Atlanta Braves'],['BAL','Baltimore Orioles'],['BOS','Boston Red Sox'],
+    ['CHC','Chicago Cubs'],['CWS','Chicago White Sox'],['CIN','Cincinnati Reds'],['CLE','Cleveland Guardians'],
+    ['COL','Colorado Rockies'],['DET','Detroit Tigers'],['HOU','Houston Astros'],['KC','Kansas City Royals'],
+    ['LAA','Los Angeles Angels'],['LAD','Los Angeles Dodgers'],['MIA','Miami Marlins'],['MIL','Milwaukee Brewers'],
+    ['MIN','Minnesota Twins'],['NYM','New York Mets'],['NYY','New York Yankees'],['ATH','Athletics'],
+    ['PHI','Philadelphia Phillies'],['PIT','Pittsburgh Pirates'],['SD','San Diego Padres'],['SF','San Francisco Giants'],
+    ['SEA','Seattle Mariners'],['STL','St. Louis Cardinals'],['TB','Tampa Bay Rays'],['TEX','Texas Rangers'],
+    ['TOR','Toronto Blue Jays'],['WSH','Washington Nationals']
+  ];
+  var POSITIONS = ['C','1B','2B','3B','SS','LF','CF','RF','OF','DH'];
+  // Common alternate abbreviations so either style in the data file works.
+  var TEAM_ALIASES = {OAK:'ATH',ARI:'ARI',AZ:'ARI',CHW:'CWS',CHA:'CWS',CHN:'CHC',KCR:'KC',KCA:'KC',LAN:'LAD',NYA:'NYY',NYN:'NYM',SDP:'SD',SDN:'SD',SFG:'SF',SFN:'SF',SLN:'STL',TBR:'TB',TBA:'TB',WAS:'WSH',WSN:'WSH',ANA:'LAA',FLA:'MIA'};
   var allRows = [];
   var lastFilteredRows = [];
   var sortKey = 'PRI';
   var sortDir = 'desc';
   var hasTeam = false;
+  var hasPos = false;
 
   // Splits one CSV line, honouring "quoted, fields".
   function splitLine(line) {
@@ -40,6 +55,7 @@
         var raw = cells[idx] !== undefined ? cells[idx].trim() : '';
         row[h] = NUMERIC_COLS.indexOf(h) !== -1 ? (raw === '' ? NaN : parseFloat(raw)) : raw;
       });
+      if (row.Team) row.Team = normTeam(row.Team);
       rows.push(row);
     }
     return { headers: headers, rows: rows };
@@ -91,11 +107,18 @@
 
   function populateFilter(selectEl, values) {
     values.forEach(function (v) {
+      var value = Array.isArray(v) ? v[0] : v;
+      var label = Array.isArray(v) ? v[1] : v;
       var opt = document.createElement('option');
-      opt.value = v;
-      opt.textContent = v;
+      opt.value = value;
+      opt.textContent = label;
       selectEl.appendChild(opt);
     });
+  }
+
+  function normTeam(t) {
+    var u = String(t || '').trim().toUpperCase();
+    return TEAM_ALIASES[u] || u;
   }
 
   function esc(s) {
@@ -167,10 +190,16 @@
     var minPA = parseInt(document.getElementById('f-pa').value, 10) || 0;
     var search = document.getElementById('f-search').value.trim().toLowerCase();
 
+    var teamFilterOn = team && hasTeam;
+    var posFilterOn = pos && hasPos;
+    var notes = [];
+    if (team && !hasTeam) notes.push('Team data is not in the data file yet, so the team filter is not applied');
+    if (pos && !hasPos) notes.push('Position data is not in the data file yet, so the position filter is not applied');
+
     var filtered = allRows.filter(function (r) {
       if (year && String(r.Year) !== String(year)) return false;
-      if (team && r.Team !== team) return false;
-      if (pos && r.Position !== pos) return false;
+      if (teamFilterOn && r.Team !== team) return false;
+      if (posFilterOn && String(r.Position).toUpperCase().split(/[\/,]/).indexOf(pos) === -1) return false;
       if ((r.PA || 0) < minPA) return false;
       if (search && (!r.Name || r.Name.toLowerCase().indexOf(search) === -1)) return false;
       return true;
@@ -191,7 +220,7 @@
     renderRows(filtered, !year);
     document.getElementById('rowcount').textContent =
       filtered.length + (filtered.length === 1 ? ' player shown' : ' players shown') +
-      ' (out of ' + allRows.length + ' total)';
+      ' (out of ' + allRows.length + ' total)' + (notes.length ? ' \u2014 ' + notes.join('; ') + '.' : '');
   }
 
   function renderRows(rows, showYear) {
@@ -230,7 +259,7 @@
   // Team / Position are optional: when the data file has none, hide their column and filters.
   function applyOptionalColumns(rows) {
     hasTeam = rows.some(function (r) { return r.Team; });
-    var hasPos = rows.some(function (r) { return r.Position; });
+    hasPos = rows.some(function (r) { return r.Position; });
     var table = document.getElementById('leaderboard');
     if (!hasTeam) {
       var style = document.createElement('style');
@@ -240,20 +269,23 @@
       if (col) col.parentNode.removeChild(col);
       var blank = table.querySelector('.grouprow th.blank');
       if (blank) blank.setAttribute('colspan', '3');
-      document.getElementById('f-team').parentNode.style.display = 'none';
-    }
-    if (!hasPos) {
-      document.getElementById('f-pos').parentNode.style.display = 'none';
     }
   }
 
   function init(rows) {
     allRows = rows;
     applyOptionalColumns(rows);
-    var years = uniqueSorted(rows, 'Year').sort(function (a, b) { return b - a; });
+    var years = YEARS.slice();
+    uniqueSorted(rows, 'Year').forEach(function (y) { if (years.indexOf(y) === -1) years.push(y); });
+    years.sort(function (a, b) { return b - a; });
+    var known = {}; TEAMS.forEach(function (t) { known[t[0]] = true; });
+    var teams = TEAMS.slice();
+    uniqueSorted(rows, 'Team').forEach(function (t) { if (!known[t]) teams.push([t, t]); });
+    var positions = POSITIONS.slice();
+    uniqueSorted(rows, 'Position').forEach(function (p) { if (positions.indexOf(p) === -1 && !/[\/,]/.test(p)) positions.push(p); });
     populateFilter(document.getElementById('f-year'), years);
-    populateFilter(document.getElementById('f-team'), uniqueSorted(rows, 'Team'));
-    populateFilter(document.getElementById('f-pos'), uniqueSorted(rows, 'Position'));
+    populateFilter(document.getElementById('f-team'), teams);
+    populateFilter(document.getElementById('f-pos'), positions);
 
     document.getElementById('f-year').addEventListener('change', applyFiltersAndSort);
     document.getElementById('f-team').addEventListener('change', applyFiltersAndSort);
