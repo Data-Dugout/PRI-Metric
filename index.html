@@ -215,29 +215,29 @@
 
         <div class="dualstat">
           <div class="dualstat-item">
-            <div class="dualstat-num improve">79.5%</div>
-            <div class="dualstat-cap">of players who scored <strong>70 or higher</strong> improved the following year <span class="mono">(66 of 83)</span></div>
+            <div class="dualstat-num improve">81.2%</div>
+            <div class="dualstat-cap">of players who scored <strong>70 or higher</strong> improved the following year <span class="mono">(82 of 101)</span></div>
           </div>
           <div class="dualstat-item">
-            <div class="dualstat-num regress">93.7%</div>
-            <div class="dualstat-cap">of players who scored <strong>30 or below</strong> declined the following year <span class="mono">(59 of 63)</span></div>
+            <div class="dualstat-num regress">96.4%</div>
+            <div class="dualstat-cap">of players who scored <strong>30 or below</strong> declined the following year <span class="mono">(81 of 84)</span></div>
           </div>
         </div>
 
         <hr>
 
         <p class="wrc-title">Average wRC+ Change by PRI Score Range</p>
-        <div class="wrc-chart" role="img" aria-label="Diverging bar chart of average wRC+ change by PRI score range, from +39.7 at 90-80 down to -57.3 at 10-0">
-          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:84px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">100-90</div></div>
-          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:90px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">90-80</div></div>
-          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:51px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">80-70</div></div>
+        <div class="wrc-chart" role="img" aria-label="Diverging bar chart of average wRC+ change by PRI score range, from +55.5 at 100-90 down to -65.0 at 10-0">
+          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:89px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">100-90</div></div>
+          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:56px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">90-80</div></div>
+          <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:38px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">80-70</div></div>
           <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:16px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">70-60</div></div>
           <div class="wrc-col"><div class="wrc-pos"><div class="bar" style="height:2px;"></div></div><div class="wrc-neg"></div><div class="wrc-lbl">60-50</div></div>
-          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:23px;"></div></div><div class="wrc-lbl">50-40</div></div>
-          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:41px;"></div></div><div class="wrc-lbl">40-30</div></div>
-          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:74px;"></div></div><div class="wrc-lbl">30-20</div></div>
-          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:104px;"></div></div><div class="wrc-lbl">20-10</div></div>
-          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:130px;"></div></div><div class="wrc-lbl">10-0</div></div>
+          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:16px;"></div></div><div class="wrc-lbl">50-40</div></div>
+          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:31px;"></div></div><div class="wrc-lbl">40-30</div></div>
+          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:54px;"></div></div><div class="wrc-lbl">30-20</div></div>
+          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:69px;"></div></div><div class="wrc-lbl">20-10</div></div>
+          <div class="wrc-col"><div class="wrc-pos"></div><div class="wrc-neg"><div class="bar" style="height:104px;"></div></div><div class="wrc-lbl">10-0</div></div>
         </div>
       </div>
     </div>
@@ -246,16 +246,10 @@
   <section style="padding-top:0;">
     <div class="wrap-lb">
 
-      <div class="placeholder-note">
-        <strong>Sample data only.</strong> This table is wired up with placeholder rows
-        so you can test filtering and sorting. Replace <code>data/players.csv</code>
-        with your real export — same column order — and it'll populate automatically.
-      </div>
-
       <div class="filterbar">
         <div class="field">
           <label for="f-year">Year</label>
-          <select id="f-year"></select>
+          <select id="f-year"><option value="">All</option></select>
         </div>
         <div class="field">
           <label for="f-team">Team</label>
@@ -328,7 +322,7 @@
               <th data-key="Name" data-type="string">Name <span class="arrow">&#8597;</span></th>
               <th data-key="Team" data-type="string">Team <span class="arrow">&#8597;</span></th>
               <th data-key="PA" data-type="number">PA <span class="arrow">&#8597;</span></th>
-              <th data-key="PoR" data-type="number">PRI <span class="arrow">&#8597;</span></th>
+              <th data-key="PRI" data-type="number">PRI <span class="arrow">&#8597;</span></th>
               <th data-key="BA" data-type="number">BA <span class="arrow">&#8597;</span></th>
               <th data-key="xBA" data-type="number">xBA <span class="arrow">&#8597;</span></th>
               <th data-key="BA_Diff" data-type="number">BA Diff <span class="arrow">&#8597;</span></th>
